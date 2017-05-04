@@ -116,9 +116,38 @@
   [board p1 p2]
   (place-peg (remove-peg board p1) p2))
 
+(defn valid-moves
+  "Returns a map of all valid moves for pos where key is the
+  destination and the value is jumped position"
+  [board pos]
+  (into {}
+        (filter (fn [[destination jumped]]
+                  (and (not (pegged? board destination))
+                       (pegged? board jumped)))
+                (get-in board [pos :connections]))))
 
-;; (def *board* (atom (new-board 5)))
-;; (swap! *board* #(remove-peg % 4))
+(defn valid-move?
+  "Returns jumped position if the move from p1 to p2 is valid,
+  nil otherwise"
+  [board p1 p2]
+  (get (valid-moves board p1) p2))
+
+(defn make-move
+  "Move peg from p1 to p2, removing jumped peg."
+  [board p1 p2]
+  (if-let [jumped (valid-move? board p1 p2)]
+    (move-peg (remove-peg board jumped) p1 p2)))
+
+(defn can-move?
+  "Do any of the pegged positions have valid moves?"
+  [board]
+  (some (comp not-empty (partial valid-moves board))
+        (map first (filter #(get (second %) :pegged) board))))
+
+;;; 120 (147) Rendering and Printing the Board
+
+;; (def board (atom (new-board 5)))
+;; (swap! board #(remove-peg % 4))
        
 (defn -main
   "I don't do a whole lot ... yet."
