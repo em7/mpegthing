@@ -96,6 +96,30 @@
 
 ;; page 117 (144) Moving Pegs
 
+(defn pegged?
+  "Does the position have a peg in it?"
+  [board pos]
+  (get-in board [pos :pegged]))
+
+(defn remove-peg
+  "Take the peg at given position out of the board."
+  [board pos]
+  (assoc-in board [pos :pegged] false))
+
+(defn place-peg
+  "Put a peg in the board at given position."
+  [board pos]
+  (assoc-in board [pos :pegged] true))
+
+(defn move-peg
+  "Take peg out of p1 and place it in p2"
+  [board p1 p2]
+  (place-peg (remove-peg board p1) p2))
+
+
+;; (def *board* (atom (new-board 5)))
+;; (swap! *board* #(remove-peg % 4))
+       
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
