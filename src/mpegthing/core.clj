@@ -1,7 +1,8 @@
 (ns mpegthing.core
   "My implementation of Peg game, according to chapter 5 of book Clojure for the
   brave and true."
-  (:require [clojure.set :as set])
+  (:require [clojure.set :as set]
+            [clojure.string :as string])
   (:gen-class))
 
 (declare successful-move prompt-move game-over query-rows)
@@ -145,6 +146,42 @@
         (map first (filter #(get (second %) :pegged) board))))
 
 ;;; 120 (147) Rendering and Printing the Board
+
+(def alpha-start "ASCII a" 97)
+(def alpha-end "ASCII z + 1" 123)
+(def letters "Letters to be used on the board."
+  (map (comp str char) (range alpha-start alpha-end)))
+(def pos-chars "How much space to add to the beginning of a row." 3)
+
+(defn render-pos
+  [board pos]
+  (str (nth letters (dec pos))
+       (if (get-in board [pos :pegged])
+         "0"
+         "-")))
+
+(defn row-positions
+  "Return all positions in the given row."
+  [row-num]
+  (range (inc (or (row-tri (dec row-num)) 0))
+         (inc (row-tri row-num))))
+
+(defn row-padding
+  "String of spaces to add to the beginning of a row to center it."
+  [row-num rows]
+  (let [pad-length  (/ (* (- rows row-num) pos-chars) 2)]
+    (apply str (take pad-length (repeat " ")))))
+
+(defn render-row
+  [board row-num]
+  (str (row-padding row-num (:rows board))
+       (string/join " " (map (partial render-pos board)
+                             (row-positions row-num)))))
+
+(defn render-board
+  [board]
+  (doseq [row-num (range 1 (inc (:rows board)))]
+    (println (render-row board row-num))))
 
 ;; (def board (atom (new-board 5)))
 ;; (swap! board #(remove-peg % 4))
